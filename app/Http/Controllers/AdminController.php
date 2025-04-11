@@ -5,15 +5,53 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Products;
+use App\Models\OrderItems;
 use App\Models\Orders;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-  public function dashboard()
-  {
-    return view('admin.dashboard');
-  }
+    public function dashboard()
+    {
+        // Mendapatkan bulan dan tahun saat ini
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+    
+        // Jumlah orderan bulan ini
+        $ordersThisMonth = Orders::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->count();
+    
+        // Total amount orderItems bulan ini
+        $totalThisMonth = OrderItems::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->sum('total_amount');
+    
+        // Jumlah orderan yang statusnya 'pending' bulan ini
+        $pendingThisMonth = Orders::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->where('status', 'pending')
+            ->count();
+    
+        // Jumlah customer unik yang melakukan order bulan ini
+        $customerThisMonth = Orders::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->distinct('customer_name')
+            ->count('customer_name');
+
+            $menuFavorites = OrderItems::whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->select('product_name', \DB::raw('COUNT(*) as count'))
+            ->groupBy('product_name')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->with('product')  // Mengambil relasi product (termasuk gambar)
+            ->get();
+    
+        return view('admin.dashboard', compact('ordersThisMonth', 'totalThisMonth', 'pendingThisMonth', 'customerThisMonth', 'menuFavorites'));
+    }
+    
+
 
   public function users()
   {
@@ -27,14 +65,20 @@ class AdminController extends Controller
 
 
   public function orders()
-  {
-      $orders = Orders::with('orderItems')
-          ->withSum('orderItems', 'total_amount')
-          ->orderBy('created_at', 'desc') 
-          ->get();
-      
-      return view('admin.orders', compact('orders'));
-  }
+{
+    // Mengambil data orderan hari ini
+    $ordersToday = Orders::whereDate('created_at', today())->count();
+
+    // Ambil semua orders dengan relasi orderItems dan total_amount
+    $orders = Orders::with('orderItems')
+        ->withSum('orderItems', 'total_amount')
+        ->orderBy('created_at', 'desc') 
+        ->get();
+        
+
+    return view('admin.orders', compact('orders', 'ordersToday'));
+}
+
   
 
   public function updateOrderStatus(Request $request, $id)

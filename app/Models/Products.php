@@ -13,5 +13,8 @@ class Products extends Model
         'image',
     ];
 
-   
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItems::class, 'product_name', 'name');
+    }
 }

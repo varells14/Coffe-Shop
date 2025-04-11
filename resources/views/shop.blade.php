@@ -304,7 +304,7 @@
             @if(count($products) == 0)
             <div class="text-center py-16">
                 <i class="fas fa-coffee text-gray-300 text-5xl mb-4"></i>
-                <p class="text-gray-500 text-lg">No products available at the moment. Please check back later!</p>
+                <p class="text-gray-500 text-lg">No menus available at the moment. Please check back later!</p>
             </div>
             @endif
         </div>
@@ -510,11 +510,11 @@
             closeProductModal(productId);
             
             // Show notification
-            showNotification('Product added to cart!');
+            showNotification('Menus added to cart!');
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Failed to add product to cart.', 'error');
+            showNotification('Failed to add menus to cart.', 'error');
         });
     }
     
@@ -587,11 +587,11 @@
         .then(response => response.json())
         .then(data => {
             updateCartModal(data.cart);
-            showNotification('Product removed from cart!');
+            showNotification('Menus removed from cart!');
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Failed to remove product from cart.', 'error');
+            showNotification('Failed to remove menus from cart.', 'error');
         });
     }
     
